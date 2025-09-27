@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Thêm Location</title>
+  <meta charset="UTF-8" />
+  <title>Quản lý Location</title>
 </head>
 <body>
   <h2>Thêm Location</h2>
@@ -27,24 +27,27 @@
       const lat = document.getElementById("lat").value;
       const long = document.getElementById("long").value;
 
-      const res = await fetch(`${API_URL}/create`, {
+      await fetch(`${API_URL}/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, lat, long })
       });
 
-      const data = await res.json();
-      console.log("Đã thêm:", data);
-      loadLocations(); // load lại danh sách
+      // Reset form
+      document.getElementById("locationForm").reset();
+
+      // Load lại danh sách
+      loadLocations();
     });
 
-    // Load danh sách location
+    // Hàm load danh sách location
     async function loadLocations() {
       const res = await fetch(API_URL);
       const data = await res.json();
 
       const list = document.getElementById("locationList");
       list.innerHTML = "";
+
       data.forEach((loc) => {
         const li = document.createElement("li");
         li.textContent = `${loc.name} - lat: ${loc.lat}, long: ${loc.long}`;
@@ -52,7 +55,7 @@
       });
     }
 
-    // Tải danh sách khi mở web
+    // Load danh sách khi mở trang
     loadLocations();
   </script>
 </body>

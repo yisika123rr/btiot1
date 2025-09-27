@@ -40,31 +40,28 @@ console.log("MONGO_URI từ .env:", process.env.MONGO_URI);
 const app = express();
 
 // Middleware (các tầng trung gian xử lý request)
-// Cho phép server hiểu dữ liệu dạng form và JSON
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-// Cho phép truy cập từ domain khác (CORS)
 app.use(cors());
-app.use(express.static("public"));
+app.use(express.static("public")); // phục vụ file index.html
 
 // Kết nối tới MongoDB Atlas bằng MONGO_URI trong file .env
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("Đã kết nối MongoDB"))
-  .catch((err) => console.error("Lỗi kết nối MongoDB:", err));
+  .then(() => console.log("✅ Đã kết nối MongoDB"))
+  .catch((err) => console.error("❌ Lỗi kết nối MongoDB:", err));
 
-// Route gốc để test server (truy cập / sẽ thấy thông báo này)
+// Route gốc để test server
 app.get("/", (req, res) => {
-  res.send("Server đang chạy ");
+  res.send("Server đang chạy 🚀");
 });
 
 // Import và sử dụng router cho API location
 import locationRouter from "./api/routes/location.route.js";
 app.use("/api/location", locationRouter);
 
-// Khởi động server, lắng nghe tại cổng PORT
-// Trên Render, PORT sẽ được tự động cấp qua process.env.PORT
+// Khởi động server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server đang chạy tại${PORT}`);
+  console.log(`🚀 Server đang chạy tại cổng ${PORT}`);
 });
