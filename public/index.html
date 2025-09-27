@@ -55,11 +55,12 @@
       list.innerHTML = "";
       data.forEach((loc) => {
         const li = document.createElement("li");
-        li.textContent = `${loc.name} - lat: ${loc.lat}, long: ${loc.long} `;
+        li.textContent = `${loc.name || "(không có tên)"} - lat: ${loc.lat}, long: ${loc.long} `;
 
         // Nút xoá từng location
         const delBtn = document.createElement("button");
         delBtn.textContent = "Xoá";
+        delBtn.style.marginLeft = "10px";
         delBtn.onclick = async () => {
           if (confirm(`Xoá location: ${loc.name}?`)) {
             await fetch(`${API_URL}/delete/${loc._id}`, { method: "DELETE" });
