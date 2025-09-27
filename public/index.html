@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nhập Location</title>
+</head>
+<body>
+  <h1>Thêm Location</h1>
+  <form id="locationForm">
+    <input type="text" id="name" placeholder="Tên địa điểm" required>
+    <input type="number" id="lat" placeholder="Vĩ độ" required>
+    <input type="number" id="lng" placeholder="Kinh độ" required>
+    <button type="submit">Thêm</button>
+  </form>
+
+  <h2>Danh sách Location</h2>
+  <ul id="locationList"></ul>
+
+  <script>
+    // Gửi dữ liệu
+    document.getElementById("locationForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const data = {
+        name: document.getElementById("name").value,
+        lat: parseFloat(document.getElementById("lat").value),
+        lng: parseFloat(document.getElementById("lng").value),
+      };
+
+      await fetch("/api/location/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      loadLocations();
+    });
+
+    // Hiển thị danh sách
+    async function loadLocations() {
+      const res = await fetch("/api/location");
+      const locations = await res.json();
+
+      const list = document.getElementById("locationList");
+      list.innerHTML = "";
+      locations.forEach(loc => {
+        const li = document.createElement("li");
+        li.textContent = `${loc.name} (${loc.lat}, ${loc.lng})`;
+        list.appendChild(li);
+      });
+    }
+
+    loadLocations();
+  </script>
+</body>
+</html>

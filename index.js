@@ -45,6 +45,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 // Cho phép truy cập từ domain khác (CORS)
 app.use(cors());
+app.use(express.static("public"));
 
 // Kết nối tới MongoDB Atlas bằng MONGO_URI trong file .env
 mongoose
