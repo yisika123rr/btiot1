@@ -7,9 +7,9 @@
 <body>
   <h1>Thêm Location</h1>
   <form id="locationForm">
-    <input type="text" id="name" placeholder="Tên địa điểm" required>
-    <input type="number" id="lat" placeholder="Vĩ độ" required>
-    <input type="number" id="lng" placeholder="Kinh độ" required>
+    <input type="text" name="name" placeholder="Tên location" required />
+    <input type="number" step="any" name="latitude" placeholder="Vĩ độ" required />
+    <input type="number" step="any" name="longitude" placeholder="Kinh độ" required />
     <button type="submit">Thêm</button>
   </form>
 
@@ -17,39 +17,37 @@
   <ul id="locationList"></ul>
 
   <script>
-    // Gửi dữ liệu
-    document.getElementById("locationForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const data = {
-        name: document.getElementById("name").value,
-        lat: parseFloat(document.getElementById("lat").value),
-        lng: parseFloat(document.getElementById("lng").value),
-      };
-
-      await fetch("/api/location/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
-
-      loadLocations();
-    });
-
-    // Hiển thị danh sách
+    // Hàm load danh sách location từ server
     async function loadLocations() {
       const res = await fetch("/api/location");
-      const locations = await res.json();
-
+      const data = await res.json();
       const list = document.getElementById("locationList");
       list.innerHTML = "";
-      locations.forEach(loc => {
+      data.forEach(loc => {
         const li = document.createElement("li");
-        li.textContent = `${loc.name} (${loc.lat}, ${loc.lng})`;
+        li.textContent = `${loc.name} (${loc.latitude}, ${loc.longitude})`;
         list.appendChild(li);
       });
     }
 
+    // Bắt sự kiện submit form
+    document.getElementById("locationForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const body = Object.fromEntries(formData.entries());
+      
+      // gửi POST request
+      await fetch("/api/location/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      e.target.reset();
+      loadLocations();
+    });
+
+    // load lần đầu
     loadLocations();
   </script>
 </body>
