@@ -1,57 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Nhập Location</title>
+  <title>Thêm Location</title>
 </head>
 <body>
-  <h1>Thêm Location</h1>
+  <h2>Thêm Location</h2>
   <form id="locationForm">
-    <input type="text" id="name" placeholder="Tên location" required>
-    <input type="number" step="any" id="lat" placeholder="Vĩ độ" required>
-    <input type="number" step="any" id="long" placeholder="Kinh độ" required>
-    <button type="submit">Thêm</button>
+    <label>Tên: <input type="text" id="name" required></label><br><br>
+    <label>Vĩ độ (lat): <input type="text" id="lat" required></label><br><br>
+    <label>Kinh độ (long): <input type="text" id="long" required></label><br><br>
+    <button type="submit">Gửi</button>
   </form>
 
   <h2>Danh sách Location</h2>
   <ul id="locationList"></ul>
 
   <script>
-    const apiUrl = "/api/locations"; // backend route
+    const API_URL = "/api/location";
 
-    async function fetchLocations() {
-      const res = await fetch(apiUrl);
+    // Submit form -> POST location
+    document.getElementById("locationForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const lat = document.getElementById("lat").value;
+      const long = document.getElementById("long").value;
+
+      const res = await fetch(`${API_URL}/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, lat, long })
+      });
+
       const data = await res.json();
+      console.log("Đã thêm:", data);
+      loadLocations(); // load lại danh sách
+    });
+
+    // Load danh sách location
+    async function loadLocations() {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+
       const list = document.getElementById("locationList");
       list.innerHTML = "";
-      data.forEach(loc => {
+      data.forEach((loc) => {
         const li = document.createElement("li");
-        li.textContent = `${loc.name} (${loc.lat}, ${loc.long})`;
+        li.textContent = `${loc.name} - lat: ${loc.lat}, long: ${loc.long}`;
         list.appendChild(li);
       });
     }
 
-    document.getElementById("locationForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = document.getElementById("name").value;
-      const lat = parseFloat(document.getElementById("lat").value);
-      const long = parseFloat(document.getElementById("long").value);
-
-      await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, lat, long }),
-      });
-
-      // Clear form
-      e.target.reset();
-
-      // Refresh list
-      fetchLocations();
-    });
-
-    // Load list on page load
-    fetchLocations();
+    // Tải danh sách khi mở web
+    loadLocations();
   </script>
 </body>
 </html>
