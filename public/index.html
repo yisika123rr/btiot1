@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Quản lý Location</title>
 </head>
 <body>
@@ -10,11 +10,12 @@
     <label>Tên: <input type="text" id="name" required></label><br><br>
     <label>Vĩ độ (lat): <input type="text" id="lat" required></label><br><br>
     <label>Kinh độ (long): <input type="text" id="long" required></label><br><br>
-    <button type="submit">Gửi</button>
+    <button type="submit">Thêm</button>
   </form>
 
   <h2>Danh sách Location</h2>
   <ul id="locationList"></ul>
+  <button id="deleteAllBtn">Xoá toàn bộ</button>
 
   <script>
     const API_URL = "/api/location";
@@ -33,29 +34,45 @@
         body: JSON.stringify({ name, lat, long })
       });
 
-      // Reset form
-      document.getElementById("locationForm").reset();
-
-      // Load lại danh sách
+      e.target.reset();
       loadLocations();
     });
 
-    // Hàm load danh sách location
+    // Xoá tất cả
+    document.getElementById("deleteAllBtn").addEventListener("click", async () => {
+      if (confirm("Bạn có chắc muốn xoá toàn bộ không?")) {
+        await fetch(`${API_URL}/delete`, { method: "DELETE" });
+        loadLocations();
+      }
+    });
+
+    // Load danh sách location
     async function loadLocations() {
       const res = await fetch(API_URL);
       const data = await res.json();
 
       const list = document.getElementById("locationList");
       list.innerHTML = "";
-
       data.forEach((loc) => {
         const li = document.createElement("li");
-        li.textContent = `${loc.name} - lat: ${loc.lat}, long: ${loc.long}`;
+        li.textContent = `${loc.name} - lat: ${loc.lat}, long: ${loc.long} `;
+
+        // Nút xoá từng location
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Xoá";
+        delBtn.onclick = async () => {
+          if (confirm(`Xoá location: ${loc.name}?`)) {
+            await fetch(`${API_URL}/delete/${loc._id}`, { method: "DELETE" });
+            loadLocations();
+          }
+        };
+
+        li.appendChild(delBtn);
         list.appendChild(li);
       });
     }
 
-    // Load danh sách khi mở trang
+    // Tải danh sách khi mở web
     loadLocations();
   </script>
 </body>
