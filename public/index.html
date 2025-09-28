@@ -3,25 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <title>Quản lý Location</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    h2 {
+      margin-top: 30px;
+    }
+
+    /* Form */
+    #locationForm {
+      border: 1px solid #444;
+      padding: 10px;
+      width: 320px;
+      display: grid;
+      grid-template-columns: 120px 1fr 60px;
+      grid-gap: 5px;
+      align-items: center;
+    }
+
+    #locationForm label {
+      grid-column: 1 / 2;
+      font-size: 14px;
+    }
+
+    #locationForm input {
+      grid-column: 2 / 3;
+      padding: 4px;
+      font-size: 14px;
+    }
+
+    #locationForm button {
+      grid-column: 3 / 4;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    /* Danh sách */
+    #locationList {
+      list-style-type: disc;
+      margin-top: 10px;
+      padding-left: 20px;
+    }
+
+    #locationList li {
+      margin: 6px 0;
+    }
+
+    /* xoa id*/
+    #locationList button {
+      margin-left: 10px;
+      padding: 2px 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* xoa all */
+    #deleteAllBtn {
+      margin-left: 10px;
+      padding: 5px 10px;
+      background: #f8d7da;
+      border: 1px solid #dc3545;
+      color: #dc3545;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h2>Thêm Location</h2>
+  <h2>Thêm địa điểm</h2>
   <form id="locationForm">
-    <label>Tên: <input type="text" id="name" required></label><br><br>
-    <label>Vĩ độ (lat): <input type="text" id="lat" required></label><br><br>
-    <label>Kinh độ (long): <input type="text" id="long" required></label><br><br>
+    <label for="name">Tên:</label>
+    <input type="text" id="name" required>
     <button type="submit">Gửi</button>
+
+    <label for="lat">Vĩ độ (lat):</label>
+    <input type="text" id="lat" required>
+
+    <label for="long">Kinh độ (long):</label>
+    <input type="text" id="long" required>
   </form>
 
-  <h2>Danh sách Location</h2>
+  <h2>
+    Danh sách Location
+    <button id="deleteAllBtn">Xoá tất cả</button>
+  </h2>
   <ul id="locationList"></ul>
-
-  <button id="deleteAllBtn" style="margin-top:15px; color:red;">Xoá tất cả</button>
 
   <script>
     const API_URL = "/api/location";
 
-    // Hàm load danh sách location
     async function loadLocations() {
       const res = await fetch(API_URL);
       const data = await res.json();
@@ -32,10 +105,8 @@
         const li = document.createElement("li");
         li.textContent = `${loc.name} - lat: ${loc.lat}, long: ${loc.long}`;
 
-        // nút xoá theo id
         const btn = document.createElement("button");
         btn.textContent = "Xoá";
-        btn.style.marginLeft = "10px";
         btn.onclick = async () => {
           await fetch(`${API_URL}/delete/${loc._id}`, { method: "DELETE" });
           loadLocations();
@@ -46,10 +117,8 @@
       });
     }
 
-    // Submit form -> POST location
     document.getElementById("locationForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const name = document.getElementById("name").value;
       const lat = document.getElementById("lat").value;
       const long = document.getElementById("long").value;
@@ -60,12 +129,10 @@
         body: JSON.stringify({ name, lat, long })
       });
 
-      // reset form
       e.target.reset();
       loadLocations();
     });
 
-    // Nút xoá tất cả
     document.getElementById("deleteAllBtn").addEventListener("click", async () => {
       if (confirm("Bạn có chắc muốn xoá toàn bộ?")) {
         await fetch(`${API_URL}/delete`, { method: "DELETE" });
@@ -73,7 +140,6 @@
       }
     });
 
-    // load danh sách khi mở web
     loadLocations();
   </script>
 </body>
