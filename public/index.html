@@ -10,38 +10,33 @@
     }
 
     h2 {
-      margin-top: 30px;
+      margin-top: 25px;
     }
 
-    /* Form */
+    /* Bảng form */
     #locationForm {
-      border: 1px solid #444;
-      padding: 10px;
-      width: 320px;
-      display: grid;
-      grid-template-columns: 120px 1fr 60px;
-      grid-gap: 5px;
-      align-items: center;
+      border: 1px solid #000;
+      border-collapse: collapse;
+      margin-bottom: 20px;
     }
 
-    #locationForm label {
-      grid-column: 1 / 2;
-      font-size: 14px;
+    #locationForm td {
+      border: 1px solid #000;
+      padding: 6px;
     }
 
     #locationForm input {
-      grid-column: 2 / 3;
+      width: 200px;
       padding: 4px;
-      font-size: 14px;
     }
 
     #locationForm button {
-      grid-column: 3 / 4;
-      padding: 5px 10px;
+      width: 100%;
+      padding: 6px 0;
       cursor: pointer;
     }
 
-    /* Danh sách */
+    /* Danh sách location */
     #locationList {
       list-style-type: disc;
       margin-top: 10px;
@@ -52,18 +47,17 @@
       margin: 6px 0;
     }
 
-    /* xoa id*/
     #locationList button {
       margin-left: 10px;
-      padding: 2px 6px;
-      font-size: 13px;
+      padding: 3px 8px;
+      background: #e9ecef;
+      border: 1px solid #999;
       cursor: pointer;
     }
 
-    /* xoa all */
     #deleteAllBtn {
       margin-left: 10px;
-      padding: 5px 10px;
+      padding: 6px 12px;
       background: #f8d7da;
       border: 1px solid #dc3545;
       color: #dc3545;
@@ -74,16 +68,24 @@
 </head>
 <body>
   <h2>Thêm địa điểm</h2>
-  <form id="locationForm">
-    <label for="name">Tên:</label>
-    <input type="text" id="name" required>
-    <button type="submit">Gửi</button>
-
-    <label for="lat">Vĩ độ (lat):</label>
-    <input type="text" id="lat" required>
-
-    <label for="long">Kinh độ (long):</label>
-    <input type="text" id="long" required>
+  <form id="formWrapper">
+    <table id="locationForm">
+      <tr>
+        <td>Tên:</td>
+        <td><input type="text" id="name" required></td>
+      </tr>
+      <tr>
+        <td>Vĩ độ (lat):</td>
+        <td><input type="text" id="lat" required></td>
+      </tr>
+      <tr>
+        <td>Kinh độ (long):</td>
+        <td><input type="text" id="long" required></td>
+      </tr>
+      <tr>
+        <td colspan="2"><button type="submit">Gửi</button></td>
+      </tr>
+    </table>
   </form>
 
   <h2>
@@ -117,7 +119,7 @@
       });
     }
 
-    document.getElementById("locationForm").addEventListener("submit", async (e) => {
+    document.getElementById("formWrapper").addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = document.getElementById("name").value;
       const lat = document.getElementById("lat").value;
