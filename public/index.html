@@ -4,123 +4,91 @@
   <meta charset="UTF-8">
   <title>Quản lý Location</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-
-    h2 {
-      margin-top: 25px;
-    }
-
-    /* Bảng form */
-    #locationForm {
-      border: 1px solid #000;
+    table {
       border-collapse: collapse;
-      margin-bottom: 20px;
-    }
-
-    #locationForm td {
-      border: 1px solid #000;
-      padding: 6px;
-    }
-
-    #locationForm input {
-      width: 200px;
-      padding: 4px;
-    }
-
-    #locationForm button {
       width: 100%;
-      padding: 6px 0;
-      cursor: pointer;
-    }
-
-    /* Danh sách location */
-    #locationList {
-      list-style-type: disc;
       margin-top: 10px;
-      padding-left: 20px;
     }
-
-    #locationList li {
-      margin: 6px 0;
+    table, th, td {
+      border: 1px solid black;
     }
-
-    #locationList button {
-      margin-left: 10px;
-      padding: 3px 8px;
-      background: #e9ecef;
-      border: 1px solid #999;
+    th, td {
+      padding: 8px;
+      text-align: left;
+    }
+    button {
       cursor: pointer;
     }
-
     #deleteAllBtn {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      padding: 5px 10px;
       margin-left: 10px;
-      padding: 6px 12px;
-      background: #f8d7da;
-      border: 1px solid #dc3545;
-      color: #dc3545;
-      font-weight: bold;
-      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <h2>Thêm địa điểm</h2>
-  <form id="formWrapper">
-    <table id="locationForm">
-      <tr>
-        <td>Tên:</td>
-        <td><input type="text" id="name" required></td>
-      </tr>
-      <tr>
-        <td>Vĩ độ (lat):</td>
-        <td><input type="text" id="lat" required></td>
-      </tr>
-      <tr>
-        <td>Kinh độ (long):</td>
-        <td><input type="text" id="long" required></td>
-      </tr>
-      <tr>
-        <td colspan="2"><button type="submit">Gửi</button></td>
-      </tr>
-    </table>
+  <form id="locationForm" style="border:1px solid black; padding:10px; width:350px;">
+    <label>Tên: <input type="text" id="name" required></label><br><br>
+    <label>Vĩ độ (lat): <input type="text" id="lat" required></label><br><br>
+    <label>Kinh độ (long): <input type="text" id="long" required></label><br><br>
+    <button type="submit" style="width:100%;">Gửi</button>
   </form>
 
   <h2>
     Danh sách Location
     <button id="deleteAllBtn">Xoá tất cả</button>
   </h2>
-  <ul id="locationList"></ul>
+
+  <table id="locationTable">
+    <thead>
+      <tr>
+        <th>Tên</th>
+        <th>Vĩ độ (lat)</th>
+        <th>Kinh độ (long)</th>
+        <th>Hành động</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
   <script>
     const API_URL = "/api/location";
 
+    // Hàm load danh sách location
     async function loadLocations() {
       const res = await fetch(API_URL);
       const data = await res.json();
 
-      const list = document.getElementById("locationList");
-      list.innerHTML = "";
-      data.forEach((loc) => {
-        const li = document.createElement("li");
-        li.textContent = `${loc.name} - lat: ${loc.lat}, long: ${loc.long}`;
+      const tbody = document.querySelector("#locationTable tbody");
+      tbody.innerHTML = "";
 
-        const btn = document.createElement("button");
-        btn.textContent = "Xoá";
-        btn.onclick = async () => {
+      data.forEach((loc) => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${loc.name}</td>
+          <td>${loc.lat}</td>
+          <td>${loc.long}</td>
+          <td><button class="deleteBtn">Xoá</button></td>
+        `;
+
+        // xoá theo id
+        tr.querySelector(".deleteBtn").onclick = async () => {
           await fetch(`${API_URL}/delete/${loc._id}`, { method: "DELETE" });
           loadLocations();
         };
 
-        li.appendChild(btn);
-        list.appendChild(li);
+        tbody.appendChild(tr);
       });
     }
 
-    document.getElementById("formWrapper").addEventListener("submit", async (e) => {
+    // Submit form
+    document.getElementById("locationForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+
       const name = document.getElementById("name").value;
       const lat = document.getElementById("lat").value;
       const long = document.getElementById("long").value;
@@ -131,10 +99,12 @@
         body: JSON.stringify({ name, lat, long })
       });
 
+      // reset form
       e.target.reset();
       loadLocations();
     });
 
+    // xoá tất cả
     document.getElementById("deleteAllBtn").addEventListener("click", async () => {
       if (confirm("Bạn có chắc muốn xoá toàn bộ?")) {
         await fetch(`${API_URL}/delete`, { method: "DELETE" });
@@ -142,6 +112,7 @@
       }
     });
 
+    // load danh sách
     loadLocations();
   </script>
 </body>
