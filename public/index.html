@@ -1,40 +1,73 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Quản lý Location</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 18px; }
-    form.box { border:1px solid #000; padding:12px; width:360px; margin-bottom:18px; }
-    form.box label { display:block; margin:6px 0; }
-    input[type="text"] { width:220px; padding:4px; }
-    button { cursor:pointer; }
+    body {
+      font-family: Arial, sans-serif;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 500px;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+    th, td {
+      padding: 6px 12px;
+      text-align: left;
+    }
+    button {
+      cursor: pointer;
+    }
     #deleteAllBtn {
       background-color: #f8d7da;
       color: #721c24;
       border: 1px solid #f5c6cb;
-      padding: 6px 10px;
+      padding: 5px 10px;
       margin-left: 10px;
     }
-    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-    table, th, td { border: 1px solid #000; }
-    th, td { padding: 8px; text-align: left; }
-    th { background: #f2f2f2; }
-    .deleteBtn {
-      background: #f5c6cb; border: 1px solid #d88; padding: 4px 8px; border-radius:4px;
+    form {
+      border: 1px solid black;
+      padding: 10px;
+      width: 350px;
     }
-    .deleteBtn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .notice { margin-top:8px; color: #b33; }
+    form input {
+      width: 200px;
+    }
+    form button {
+      margin-top: 8px;
+      width: 100%;
+    }
+    /* Thêm scroll cho bảng */
+    .table-container {
+      border: 1px solid black;
+      max-height: 200px; /* chỉnh theo ý bạn */
+      overflow-y: auto;
+      width: fit-content; /* bảng vừa khít nội dung */
+    }
+    /* Căn long + nút xoá */
+    .long-cell {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-width: 120px; /* đảm bảo có khoảng trống */
+    }
+    .long-cell button {
+      margin-left: 10px;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
   <h2>Thêm địa điểm</h2>
-
-  <form id="locationForm" class="box" autocomplete="off">
-    <label>Tên: <input type="text" id="name" required /></label>
-    <label>Vĩ độ (lat): <input type="text" id="lat" required /></label>
-    <label>Kinh độ (long): <input type="text" id="long" required /></label>
-    <button type="submit" style="width:100%;">Gửi</button>
+  <form id="locationForm">
+    <label>Tên: <input type="text" id="name" required></label><br><br>
+    <label>Vĩ độ (lat): <input type="text" id="lat" required></label><br><br>
+    <label>Kinh độ (long): <input type="text" id="long" required></label><br><br>
+    <button type="submit">Gửi</button>
   </form>
 
   <h2>
@@ -42,145 +75,81 @@
     <button id="deleteAllBtn">Xoá tất cả</button>
   </h2>
 
-  <table id="locationTable" aria-live="polite">
-    <thead>
-      <tr>
-        <th>Tên</th>
-        <th>Vĩ độ (lat)</th>
-        <th>Kinh độ (long)</th>
-        <th>Hành động</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <div id="message" class="notice" role="status" aria-live="polite"></div>
+  <!-- Bọc bảng trong div -->
+  <div class="table-container">
+    <table id="locationTable">
+      <thead>
+        <tr>
+          <th>Tên</th>
+          <th>Vĩ độ (lat)</th>
+          <th>Kinh độ (long)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <script>
-    const API_URL = '/api/location';
-    const messageEl = document.getElementById('message');
+    const API_URL = "/api/location";
 
-    function showMessage(txt, timeout = 3000) {
-      messageEl.textContent = txt;
-      if (timeout) setTimeout(()=>{ if (messageEl.textContent === txt) messageEl.textContent = ''; }, timeout);
-    }
-
+    // Hàm load danh sách location
     async function loadLocations() {
-      try {
-        const res = await fetch(API_URL);
-        if (!res.ok) {
-          showMessage('Không tải được danh sách (HTTP ' + res.status + ')');
-          return;
-        }
-        const data = await res.json();
-        const tbody = document.querySelector('#locationTable tbody');
-        tbody.innerHTML = '';
+      const res = await fetch(API_URL);
+      const data = await res.json();
 
-        data.forEach(loc => {
-          const tr = document.createElement('tr');
+      const tbody = document.querySelector("#locationTable tbody");
+      tbody.innerHTML = "";
 
-          const tdName = document.createElement('td');
-          tdName.textContent = loc.name ?? '';
+      data.forEach((loc) => {
+        const tr = document.createElement("tr");
 
-          const tdLat = document.createElement('td');
-          tdLat.textContent = (loc.lat !== undefined && loc.lat !== null) ? loc.lat : '';
+        tr.innerHTML = `
+          <td>${loc.name}</td>
+          <td>${loc.lat}</td>
+          <td class="long-cell">
+            <span>${loc.long}</span>
+            <button class="deleteBtn">Xoá</button>
+          </td>
+        `;
 
-          const tdLong = document.createElement('td');
-          tdLong.textContent = (loc.long !== undefined && loc.long !== null) ? loc.long : '';
+        // xoá theo id
+        tr.querySelector(".deleteBtn").onclick = async () => {
+          await fetch(`${API_URL}/delete/${loc._id}`, { method: "DELETE" });
+          loadLocations();
+        };
 
-          const tdAction = document.createElement('td');
-          tdAction.style.textAlign = 'center';
-
-          const btn = document.createElement('button');
-          btn.className = 'deleteBtn';
-          btn.textContent = 'Xoá';
-          btn.addEventListener('click', async () => {
-            if (!confirm('Bạn có chắc muốn xoá địa điểm này?')) return;
-            btn.disabled = true;
-            try {
-              const r = await fetch(`${API_URL}/delete/${encodeURIComponent(loc._id)}`, { method: 'DELETE' });
-              if (!r.ok) {
-                const text = await r.text().catch(()=>null);
-                throw new Error(text || ('HTTP ' + r.status));
-              }
-              showMessage('Đã xoá');
-              await loadLocations();
-            } catch (err) {
-              alert('Lỗi khi xoá: ' + (err.message || err));
-              btn.disabled = false;
-            }
-          });
-
-          tdAction.appendChild(btn);
-
-          tr.appendChild(tdName);
-          tr.appendChild(tdLat);
-          tr.appendChild(tdLong);
-          tr.appendChild(tdAction);
-
-          tbody.appendChild(tr);
-        });
-      } catch (err) {
-        console.error(err);
-        showMessage('Lỗi khi tải danh sách: ' + (err.message || err));
-      }
+        tbody.appendChild(tr);
+      });
     }
 
-    document.getElementById('locationForm').addEventListener('submit', async (e) => {
+    // Submit form
+    document.getElementById("locationForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const name = document.getElementById('name').value.trim();
-      const latRaw = document.getElementById('lat').value.trim();
-      const longRaw = document.getElementById('long').value.trim();
 
-      const lat = Number(latRaw);
-      const long = Number(longRaw);
+      const name = document.getElementById("name").value;
+      const lat = document.getElementById("lat").value;
+      const long = document.getElementById("long").value;
 
-      if (!name) { alert('Nhập tên'); return; }
-      if (latRaw === '' || Number.isNaN(lat)) { alert('Vĩ độ phải là số'); return; }
-      if (longRaw === '' || Number.isNaN(long)) { alert('Kinh độ phải là số'); return; }
+      await fetch(`${API_URL}/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, lat, long })
+      });
 
-      try {
-        const res = await fetch(`${API_URL}/create`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, lat, long })
-        });
+      // reset form
+      e.target.reset();
+      loadLocations();
+    });
 
-        if (!res.ok) {
-          // server có thể trả về json message hoặc html, thử đọc json trước
-          let text;
-          try { text = await res.json(); text = text.message || JSON.stringify(text); }
-          catch (_) { text = await res.text().catch(()=>null); }
-          throw new Error(text || ('HTTP ' + res.status));
-        }
-
-        await res.json(); // nhận dữ liệu trả về
-        showMessage('Đã thêm địa điểm');
-        e.target.reset();
+    // xoá tất cả
+    document.getElementById("deleteAllBtn").addEventListener("click", async () => {
+      if (confirm("Bạn có chắc muốn xoá toàn bộ?")) {
+        await fetch(`${API_URL}/delete`, { method: "DELETE" });
         loadLocations();
-      } catch (err) {
-        console.error(err);
-        alert('Lỗi khi thêm: ' + (err.message || err));
       }
     });
 
-    document.getElementById('deleteAllBtn').addEventListener('click', async () => {
-      if (!confirm('Bạn có chắc muốn xoá tất cả địa điểm?')) return;
-      try {
-        const res = await fetch(`${API_URL}/delete`, { method: 'DELETE' });
-        if (!res.ok) {
-          const t = await res.text().catch(()=>null);
-          throw new Error(t || ('HTTP ' + res.status));
-        }
-        showMessage('Đã xoá tất cả');
-        loadLocations();
-      } catch (err) {
-        console.error(err);
-        alert('Lỗi khi xoá tất cả: ' + (err.message || err));
-      }
-    });
-
-    // load lần đầu
+    // load danh sách
     loadLocations();
   </script>
 </body>
